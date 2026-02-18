@@ -1,0 +1,59 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "CMake: Configure (Clang 18)",
+      "type": "shell",
+      "command": "cmake",
+      "args": [
+        "-B",
+        "${workspaceFolder}/build",
+        "-DCMAKE_CXX_COMPILER=clang++-18",
+        "-DCMAKE_BUILD_TYPE=Debug"
+      ],
+      "problemMatcher": [],
+      "group": "none",
+      "detail": "Initializes build directory using Clang 18.1.0"
+    },
+    {
+      "label": "CMake: Build Project",
+      "type": "shell",
+      "command": "cmake",
+      "args": [
+        "--build",
+        "${workspaceFolder}/build",
+        "-j",
+        "$(nproc)"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "dependsOn": [
+        "CMake: Configure (Clang 18)"
+      ],
+      "problemMatcher": "$gcc",
+      "detail": "Compiles the project using Clang 18"
+    },
+    {
+      "label": "Run: Engine Demo",
+      "type": "shell",
+      "command": "${workspaceFolder}/build/engine_demo",
+      "dependsOn": [
+        "CMake: Build Project"
+      ],
+      "problemMatcher": [],
+      "detail": "Executes the demonstration binary"
+    },
+    {
+      "label": "Run: Unit Tests",
+      "type": "shell",
+      "command": "${workspaceFolder}/build/engine_tests",
+      "dependsOn": [
+        "CMake: Build Project"
+      ],
+      "problemMatcher": [],
+      "detail": "Executes GoogleTest suite"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+# --- Build Artifacts ---
+build/
+bin/
+lib/
+*.o
+*.a
+*.so
+*.out
+
+# --- VS Code ---
+.vscode/*
+# Allow the team-shared settings, but ignore local state
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/
+*.code-workspace
+
+# --- CMake ---
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+_deps/
+
+# --- Unit Tests & Coverage ---
+*.gcda
+*.gcno
+*.gcov
+tests/test_results/
+
+# --- OS Specific ---
+.DS_Store
+Thumbs.db
