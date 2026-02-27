@@ -1,6 +1,6 @@
 # Contributing to some
 
-Thanks for your interest in `some`! 🎉
+Thanks for your interest in the `dimensional_analysis_library`! 🎉
 
 This project is currently in **early development** and is **not yet open to external contributions**. The architecture, module boundaries, and roadmap are still being actively shaped, and accepting contributions at this stage would create coordination overhead that would slow things down.
 
