@@ -1,0 +1,83 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'   # triggers on v0.1.0, v1.2.3, etc.
+
+permissions:
+  contents: write
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Build and test matrix: Clang 18 + GCC on Linux, AppleClang on macOS
+  # All three must pass before the release job runs.
+  # ---------------------------------------------------------------------------
+  test:
+    name: Test — ${{ matrix.cxx }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            cc: clang-18
+            cxx: clang++-18
+
+          - os: ubuntu-latest
+            cc: gcc
+            cxx: g++
+
+          - os: macos-latest
+            cc: clang
+            cxx: clang++
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Clang 18
+        if: matrix.cxx == 'clang++-18'
+        run: sudo apt-get install -y clang-18
+
+      - name: Configure
+        env:
+          CC: ${{ matrix.cc }}
+          CXX: ${{ matrix.cxx }}
+        run: cmake -G Ninja -B build -S . -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Run tests
+        run: ./build/engine_tests --gtest_color=yes
+
+  # ---------------------------------------------------------------------------
+  # Package the header-only library and create a GitHub Release.
+  # Only runs after all test jobs succeed.
+  # ---------------------------------------------------------------------------
+  release:
+    name: Create GitHub Release
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Package headers
+        run: |
+          VERSION="${GITHUB_REF_NAME}"
+          STAGING="dimensional-analysis-${VERSION}"
+          mkdir -p "${STAGING}/include"
+          cp include/dimensions.h include/units.h include/ecs.h "${STAGING}/include/"
+          cp README.md MANUAL.md ROADMAP.md LICENSE "${STAGING}/"
+          tar czf "${STAGING}.tar.gz" "${STAGING}"
+          sha256sum "${STAGING}.tar.gz" > SHA256SUMS.txt
+          echo "ASSET=${STAGING}.tar.gz" >> "$GITHUB_ENV"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            ${{ env.ASSET }}
+            SHA256SUMS.txt
